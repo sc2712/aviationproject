@@ -1,5 +1,5 @@
 import streamlit as st
-from model_logic import load_model, preprocess_image, classify_image
+from model_logic import keras_load_model, preprocess_image, classify_image
 from inference_api import handle_inference_decision, extract_gps_from_image, lookup_flight_by_location
 from azure_storage import upload_to_blob, upload_corrected_image_to_blob
 from azure.storage.blob import BlobServiceClient
@@ -34,7 +34,7 @@ if uploaded_file is not None:
     if uploaded_file:
         st.image(uploaded_file, caption="Uploaded Image", use_container_width=True)
         st.write("\nClassifying...")
-        model = load_model("aircraft_classifier.keras")
+        model = keras_load_model("aircraft_classifier.keras")
         img_tensor = preprocess_image(uploaded_file)
         class_name, confidence = classify_image(model, img_tensor)
         st.success(f"Prediction: {class_name} ({confidence * 100:.2f}% confidence)")
