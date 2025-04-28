@@ -32,7 +32,7 @@ if uploaded_file is not None:
 
 #upload file into classifier
     if uploaded_file:
-        st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
+        st.image(uploaded_file, caption="Uploaded Image", use_container_width=True)
         st.write("\nClassifying...")
         model = load_model("aircraft_classifier.keras")
         img_tensor = preprocess_image(uploaded_file)
