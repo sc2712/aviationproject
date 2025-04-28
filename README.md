@@ -1,2 +1,7 @@
 # aviationproject
-Aviation Project to classify and extract gps of aircraft via images
+Aviation Project 
+Classify aircraft and extract GPS via images to locate flight path
+
+#Need images for model training
+#Unsure if APIs work
+#Locates flight data manually
