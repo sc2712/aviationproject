@@ -1,0 +1,7 @@
+streamlit
+tensorflow
+numpy
+Pillow
+requests
+piexif #(no files have metatdata - can inject)
+azure-storage-blob

@@ -1,0 +1,2 @@
+#aviationstackapi
+AVIATIONSTACK_API_KEY = "1f868d24efecaa047495616b06569807"

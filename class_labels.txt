@@ -1,0 +1,6 @@
+fake commercial aircraft (AI)
+fake military aircraft (AI)
+fake private aircraft (AI)
+real commercial aircraft
+real military aircraft
+real private aircraft

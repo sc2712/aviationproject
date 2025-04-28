@@ -1,0 +1,5 @@
+# Ignore Streamlit secrets
+.streamlit/secrets.toml
+
+# Ignore local temp images
+temp_image.jpg
