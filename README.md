@@ -1,6 +1,6 @@
 # aviationproject
 '[Website](https://aviationproject-flightttracking.streamlit.app)'
-https://aviationproject-flightttracking.streamlit.app
+aviationproject-flightttracking.streamlit.app
 
 Classify aircraft and extract GPS via images to locate flight path
 
