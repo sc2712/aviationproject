@@ -1,0 +1,15 @@
+# Ignore Streamlit secrets
+.streamlit/secrets.toml
+
+# Ignore local temp images
+temp_image.jpg
+
+# Model files
+*.h5
+*.hdf5
+*.pb
+*.ckpt
+saved_model/
+models/
+checkpoints/
+artifacts/
