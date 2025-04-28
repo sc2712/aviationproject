@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Ignore Streamlit secrets
 .streamlit/secrets.toml
 
@@ -12,4 +13,20 @@ temp_image.jpg
 saved_model/
 models/
 checkpoints/
+=======
+# Ignore Streamlit secrets
+.streamlit/secrets.toml
+
+# Ignore local temp images
+temp_image.jpg
+
+# Model files
+*.h5
+*.hdf5
+*.pb
+*.ckpt
+saved_model/
+models/
+checkpoints/
+>>>>>>> 2476895c71763313186bb0c18917f7a5a6ff1428
 artifacts/
