@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 streamlit
 tensorflow
 numpy
@@ -6,12 +5,3 @@ Pillow
 requests
 piexif #(no files have metatdata - can inject)
 azure-storage-blob
-=======
-streamlit
-tensorflow
-numpy
-Pillow
-requests
-piexif #(no files have metatdata - can inject)
-azure-storage-blob
->>>>>>> 2476895c71763313186bb0c18917f7a5a6ff1428
