@@ -2,6 +2,7 @@ import streamlit as st
 from model_logic import keras_load_model, preprocess_image, classify_image
 from inference_api import handle_inference_decision, extract_gps_from_image, lookup_flight_by_location
 from azure_storage import upload_to_blob, upload_corrected_image_to_blob
+from PIL import Image
 from azure.storage.blob import BlobServiceClient
 import io
 
