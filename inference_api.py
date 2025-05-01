@@ -2,7 +2,6 @@ import requests
 import tensorflow as tf
 import numpy as np
 from tensorflow.keras.preprocessing import image
-from model_logic import preprocess_image, classify_image
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
 import streamlit as st
@@ -24,7 +23,18 @@ def handle_inference_decision(class_name):
         return "WARNING: Military aircraft detected. Tracking suspended."
     return None
 
-#insert copied code here
+def preprocess_image(image_path, img_size=(224, 224)):
+    img = image.load_img(image_path, target_size=img_size)
+    img_array = image.img_to_array(img) / 255.0
+    return np.expand_dims(img_array, axis=0)
+
+def classify_image(img_tensor):
+    prediction = model.predict(img_tensor)
+    class_index = np.argmax(prediction)
+    confidence = np.max(prediction)
+    class_name = class_labels[class_index]
+    print(f"Prediction: {class_name} | Confidence: {confidence:.2f}")
+    return class_name, confidence
 
 def check_alert(class_name):
     return class_name.startswith('fake') or 'military' in class_name.lower()

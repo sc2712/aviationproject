@@ -51,7 +51,7 @@ if uploaded_file is not None:
 
         #GPS section
         st.subheader("Flight Lookup Based on Location")
-        #Save uploaded file temporarily
+        #save uploaded file temporarily
         with open("temp_image.jpg", "wb") as f:
             f.write(uploaded_file.getbuffer())
 
