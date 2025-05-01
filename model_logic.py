@@ -14,12 +14,13 @@ class_labels = [
 ]
 
 def load_model_from_path(model_path):
-    #Loads the Keras model from the specified path.
+    #load the Keras model from the specified path.
     try:
-        # Ensure the file exists
+        #ensure file exists
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model file not found at {model_path}")
         
+        #display success/failure messages on app
         model = keras_load_model(model_path)
         st.success("Model loaded successfully.")
         return model
@@ -30,11 +31,13 @@ def load_model_from_path(model_path):
         st.error(f"Error loading model: {e}")
         return None
 
+#preprocess user image
 def preprocess_image(image_file, img_size=(224, 224)):
     img = image.load_img(image_file, target_size=img_size)
     img_array = image.img_to_array(img) / 255.0
     return np.expand_dims(img_array, axis=0)
 
+#run image through the image classification model
 def classify_image(model, img_tensor):
     prediction = model.predict(img_tensor)
     class_index = np.argmax(prediction)
