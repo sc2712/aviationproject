@@ -14,6 +14,9 @@ st.set_page_config(page_title="Aircraft Classifier", layout="centered")
 st.title("Aircraft Image Classifier")
 
 uploaded_file = st.file_uploader("Upload an aircraft image", type=["jpg", "jpeg", "png"])
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)  # Correct way to handle uploaded image
+    st.image(image, caption="Uploaded Image", use_container_width=True)
 
 MAX_IMAGE_SIZE_MB = 5  
 #check if the image size is below the limit
