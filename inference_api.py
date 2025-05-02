@@ -15,29 +15,29 @@ with open("class_labels.txt", "r") as f:
     class_labels = [line.strip() for line in f]
 
 #functions
-def handle_inference_decision(class_name):
-    class_name_lower = class_name.lower()
-    if "fake" in class_name_lower:
-        return "ALERT: FAKE aircraft detected! Further analysis recommended."
-    elif "military" in class_name_lower:
-        return "WARNING: Military aircraft detected. Tracking suspended."
-    return None
+#def handle_inference_decision(class_name):
+#    class_name_lower = class_name.lower()
+#    if "fake" in class_name_lower:
+#        return "ALERT: FAKE aircraft detected! Further analysis recommended."
+#    elif "military" in class_name_lower:
+#        return "WARNING: Military aircraft detected. Tracking suspended."
+#    return None
 
-def preprocess_image(image_path, img_size=(224, 224)):
-    img = image.load_img(image_path, target_size=img_size)
-    img_array = image.img_to_array(img) / 255.0
-    return np.expand_dims(img_array, axis=0)
+#def preprocess_image(image_path, img_size=(224, 224)):
+#    img = image.load_img(image_path, target_size=img_size)
+#    img_array = image.img_to_array(img) / 255.0
+#    return np.expand_dims(img_array, axis=0)
 
-def classify_image(img_tensor):
-    prediction = model.predict(img_tensor)
-    class_index = np.argmax(prediction)
-    confidence = np.max(prediction)
-    class_name = class_labels[class_index]
-    print(f"Prediction: {class_name} | Confidence: {confidence:.2f}")
-    return class_name, confidence
+#def classify_image(img_tensor):
+#    prediction = model.predict(img_tensor)
+#    class_index = np.argmax(prediction)
+#    confidence = np.max(prediction)
+#    class_name = class_labels[class_index]
+#    print(f"Prediction: {class_name} | Confidence: {confidence:.2f}")
+#    return class_name, confidence
 
-def check_alert(class_name):
-    return class_name.startswith('fake') or 'military' in class_name.lower()
+#def check_alert(class_name):
+#    return class_name.startswith('fake') or 'military' in class_name.lower()
 
 def extract_gps_from_image(image_path):
     try:
