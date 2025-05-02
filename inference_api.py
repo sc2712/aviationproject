@@ -5,6 +5,7 @@ from tensorflow.keras.preprocessing import image
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
 import streamlit as st
+from datetime import datetime
 
 #API Keys
 AVIATIONSTACK_API_KEY = st.secrets["AVIATIONSTACK_API_KEY"] 
@@ -39,39 +40,78 @@ def classify_image(img_tensor):
 def check_alert(class_name):
     return class_name.startswith('fake') or 'military' in class_name.lower()
 
-def extract_gps_from_image(image_path):
-    try:
-        img = Image.open(image_path)
-        exif_data = img._getexif()
-        if exif_data is None:
-            print("No EXIF metadata found.")
-            return None
-        gps_info = {}
-        for tag, value in exif_data.items():
-            decoded = TAGS.get(tag, tag)
-            if decoded == "GPSInfo":
-                for t in value:
-                    sub_decoded = GPSTAGS.get(t, t)
-                    gps_info[sub_decoded] = value[t]
-        if not gps_info:
-            print("No GPS metadata found.")
-            return None
+def extract_metadata(image_file):
+    img = Image.open(image_file)
+    exif_data = img._getexif()
 
-        def convert_to_degrees(value):
-            d, m, s = value
-            return d[0]/d[1] + (m[0]/m[1])/60 + (s[0]/s[1])/3600
+    if not exif_data:
+        return None, None
 
-        lat = convert_to_degrees(gps_info['GPSLatitude'])
-        if gps_info['GPSLatitudeRef'] != 'N':
-            lat = -lat
-        lon = convert_to_degrees(gps_info['GPSLongitude'])
-        if gps_info['GPSLongitudeRef'] != 'E':
-            lon = -lon
-        return lat, lon
+    metadata = {}
+    for tag, value in exif_data.items():
+        decoded = TAGS.get(tag, tag)
+        metadata[decoded] = value
 
-    except Exception as e:
-        print(f"Error extracting GPS: {e}")
+    # Extract timestamp
+    datetime_original = metadata.get("DateTimeOriginal")
+
+    # Extract GPS data
+    gps_info = metadata.get("GPSInfo")
+    if gps_info:
+        gps_data = {}
+        for key in gps_info.keys():
+            decode = GPSTAGS.get(key, key)
+            gps_data[decode] = gps_info[key]
+
+        lat = _convert_to_degrees(gps_data.get("GPSLatitude"), gps_data.get("GPSLatitudeRef"))
+        lon = _convert_to_degrees(gps_data.get("GPSLongitude"), gps_data.get("GPSLongitudeRef"))
+    else:
+        lat, lon = None, None
+
+    return datetime_original, (lat, lon)
+
+def _convert_to_degrees(value, ref):
+    if value is None:
         return None
+    degrees, minutes, seconds = value
+    decimal = degrees[0]/degrees[1] + minutes[0]/minutes[1]/60 + seconds[0]/seconds[1]/3600
+    if ref in ["S", "W"]:
+        decimal = -decimal
+    return decimal
+
+#def extract_gps_from_image(image_path):
+#    try:
+#        img = Image.open(image_path)
+#        exif_data = img._getexif()
+#        if exif_data is None:
+#            print("No EXIF metadata found.")
+#            return None
+#        gps_info = {}
+#        for tag, value in exif_data.items():
+#            decoded = TAGS.get(tag, tag)
+#            if decoded == "GPSInfo":
+#                for t in value:
+#                    sub_decoded = GPSTAGS.get(t, t)
+#                    gps_info[sub_decoded] = value[t]
+#        if not gps_info:
+#            print("No GPS metadata found.")
+#            return None
+#
+#        def convert_to_degrees(value):
+#            d, m, s = value
+#            return d[0]/d[1] + (m[0]/m[1])/60 + (s[0]/s[1])/3600
+
+#        lat = convert_to_degrees(gps_info['GPSLatitude'])
+#        if gps_info['GPSLatitudeRef'] != 'N':
+#            lat = -lat
+#        lon = convert_to_degrees(gps_info['GPSLongitude'])
+#        if gps_info['GPSLongitudeRef'] != 'E':
+#            lon = -lon
+#        return lat, lon
+
+#    except Exception as e:
+#        print(f"Error extracting GPS: {e}")
+#        return None
 
 def lookup_flight_by_number(flight_number):
     aviationstack_url = f"http://api.aviationstack.com/v1/flights?access_key={AVIATIONSTACK_API_KEY}&flight_iata={flight_number}"
