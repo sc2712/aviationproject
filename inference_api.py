@@ -16,14 +16,6 @@ with open("class_labels.txt", "r") as f:
     class_labels = [line.strip() for line in f]
 
 #functions
-def handle_inference_decision(class_name):
-    class_name_lower = class_name.lower()
-    if "fake" in class_name_lower:
-        return "ALERT: FAKE aircraft detected! Further analysis recommended."
-    elif "military" in class_name_lower:
-        return "WARNING: Military aircraft detected. Tracking suspended."
-    return None
-
 def preprocess_image(image_path, img_size=(224, 224)):
     img = image.load_img(image_path, target_size=img_size)
     img_array = image.img_to_array(img) / 255.0
@@ -36,6 +28,14 @@ def classify_image(img_tensor):
     class_name = class_labels[class_index]
     print(f"Prediction: {class_name} | Confidence: {confidence:.2f}")
     return class_name, confidence
+
+def handle_inference_decision(class_name):
+    class_name_lower = class_name.lower()
+    if "fake" in class_name_lower:
+        return "ALERT: FAKE aircraft detected! Further analysis recommended."
+    elif "military" in class_name_lower:
+        return "WARNING: Military aircraft detected. Tracking suspended."
+    return None
 
 def check_alert(class_name):
     return class_name.startswith('fake') or 'military' in class_name.lower()
@@ -79,39 +79,39 @@ def _convert_to_degrees(value, ref):
         decimal = -decimal
     return decimal
 
-#def extract_gps_from_image(image_path):
-#    try:
-#        img = Image.open(image_path)
-#        exif_data = img._getexif()
-#        if exif_data is None:
-#            print("No EXIF metadata found.")
-#            return None
-#        gps_info = {}
-#        for tag, value in exif_data.items():
-#            decoded = TAGS.get(tag, tag)
-#            if decoded == "GPSInfo":
-#                for t in value:
-#                    sub_decoded = GPSTAGS.get(t, t)
-#                    gps_info[sub_decoded] = value[t]
-#        if not gps_info:
-#            print("No GPS metadata found.")
-#            return None
-#
-#        def convert_to_degrees(value):
-#            d, m, s = value
-#            return d[0]/d[1] + (m[0]/m[1])/60 + (s[0]/s[1])/3600
+def extract_gps_from_image(image_path):
+    try:
+        img = Image.open(image_path)
+        exif_data = img._getexif()
+        if exif_data is None:
+            print("No EXIF metadata found.")
+            return None
+        gps_info = {}
+        for tag, value in exif_data.items():
+            decoded = TAGS.get(tag, tag)
+            if decoded == "GPSInfo":
+                for t in value:
+                    sub_decoded = GPSTAGS.get(t, t)
+                    gps_info[sub_decoded] = value[t]
+        if not gps_info:
+            print("No GPS metadata found.")
+            return None
 
-#        lat = convert_to_degrees(gps_info['GPSLatitude'])
-#        if gps_info['GPSLatitudeRef'] != 'N':
-#            lat = -lat
-#        lon = convert_to_degrees(gps_info['GPSLongitude'])
-#        if gps_info['GPSLongitudeRef'] != 'E':
-#            lon = -lon
-#        return lat, lon
+        def convert_to_degrees(value):
+            d, m, s = value
+            return d[0]/d[1] + (m[0]/m[1])/60 + (s[0]/s[1])/3600
+    
+        lat = convert_to_degrees(gps_info['GPSLatitude'])
+        if gps_info['GPSLatitudeRef'] != 'N':
+            lat = -lat
+        lon = convert_to_degrees(gps_info['GPSLongitude'])
+        if gps_info['GPSLongitudeRef'] != 'E':
+            lon = -lon
+        return lat, lon
 
-#    except Exception as e:
-#        print(f"Error extracting GPS: {e}")
-#        return None
+    except Exception as e:
+        print(f"Error extracting GPS: {e}")
+        return None
 
 def lookup_flight_by_number(flight_number):
     aviationstack_url = f"http://api.aviationstack.com/v1/flights?access_key={AVIATIONSTACK_API_KEY}&flight_iata={flight_number}"
@@ -158,4 +158,52 @@ def lookup_flight_by_location(lat, lon):
             return closest_flight
     except Exception as e:
         print(f"OpenSky Error: {e}")
+    return None
+
+def lookup_flight_by_metadata(datetime_original, lat, lon):
+    if not (datetime_original and lat and lon):
+        print("Missing metadata for flight lookup.")
+        return None
+
+    try:
+        dt_obj = datetime.strptime(datetime_original, "%Y:%m:%d %H:%M:%S")
+    except ValueError as ve:
+        print(f"Datetime parsing error: {ve}")
+        return None
+
+    url = (
+        f"http://api.aviationstack.com/v1/flights?"
+        f"access_key={AVIATIONSTACK_API_KEY}"
+        f"&limit=100&flight_date={dt_obj.date()}"
+    )
+
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        if "data" in data:
+            closest_flight = None
+            min_distance = float("inf")
+            for flight in data["data"]:
+                dep = flight.get("departure", {})
+                dep_lat, dep_lon = dep.get("latitude"), dep.get("longitude")
+                if dep_lat is None or dep_lon is None:
+                    continue
+
+                distance = ((lat - dep_lat) ** 2 + (lon - dep_lon) ** 2) ** 0.5
+                if distance < min_distance:
+                    min_distance = distance
+                    closest_flight = flight
+
+            if closest_flight:
+                return {
+                    "airline": closest_flight['airline']['name'],
+                    "flight_number": closest_flight['flight']['iata'],
+                    "departure_airport": closest_flight['departure']['airport'],
+                    "arrival_airport": closest_flight['arrival']['airport'],
+                    "status": closest_flight['flight_status'],
+                    "timestamp": closest_flight['flight_date']
+                }
+    except Exception as e:
+        print(f"Flight metadata lookup error: {e}")
     return None
