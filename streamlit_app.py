@@ -15,9 +15,9 @@ st.set_page_config(page_title="Aircraft Classifier", layout="centered")
 st.title("Aircraft Image Classifier")
 st.write("Upload an image to identify aircraft and search for related flights.")
 
-
-
 uploaded_file = st.file_uploader("Upload an aircraft image", type=["jpg", "jpeg", "png"])
+
+col1, col2 = st.columns(2)
 
 MAX_IMAGE_SIZE_MB = 5  
 #check if the image size is below the limit
@@ -89,7 +89,7 @@ if uploaded_file is not None:
             st.warning("No GPS metadata found. Please enter manually:")
             lat = st.number_input("Latitude:", format="%.6f")
             lon = st.number_input("Longitude:", format="%.6f")
-        col1, col2 = st.columns(2)            
+           
         
         with col1:
             if st.button("Find Nearby Flights from Location"):
