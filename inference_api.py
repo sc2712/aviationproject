@@ -131,34 +131,69 @@ def lookup_flight_by_number(flight_number):
         print(f"AviationStack Error: {e}")
     return None
 
-def lookup_flight_by_location(lat, lon):
-    opensky_url = "https://opensky-network.org/api/states/all"
+def lookup_flight_by_location(lat, lon, delta=0.1):
+    url = (
+        f"https://opensky-network.org/api/states/all?"
+        f"lamin={lat - delta}&lamax={lat + delta}&lomin={lon - delta}&lomax={lon + delta}"
+    )
+    
     try:
-        response = requests.get(opensky_url)
+        response = requests.get(url, timeout=10)
         data = response.json()
-        min_distance = float("inf")
-        closest_flight = None
-        for state in data['states']:
-            flight_lon = state[5]
-            flight_lat = state[6]
-            if flight_lon is None or flight_lat is None:
-                continue
-            distance = ((lat - flight_lat) ** 2 + (lon - flight_lon) ** 2) ** 0.5
-            if distance < min_distance:
-                min_distance = distance
-                closest_flight = {
-                    "callsign": state[1].strip(),
-                    "origin_country": state[2],
-                    "longitude": flight_lon,
-                    "latitude": flight_lat,
-                    "velocity": state[9],
-                    "altitude": state[7]
-                }
-        if closest_flight:
+        if "states" in data:
+            closest_flight = None
+            min_distance = float("inf")
+            for flight in data["states"]:
+                flight_lat = flight[6]
+                flight_lon = flight[5]
+                if flight_lat is None or flight_lon is None:
+                    continue
+                distance = ((lat - flight_lat)**2 + (lon - flight_lon)**2) ** 0.5
+                if distance < min_distance:
+                    min_distance = distance
+                    closest_flight = {
+                        "callsign": flight[1].strip(),
+                        "origin_country": flight[2],
+                        "latitude": flight_lat,
+                        "longitude": flight_lon,
+                        "velocity": flight[9],
+                        "altitude": flight[7],
+                        "icao24": flight[0],
+                        "timestamp": flight[4]  # Unix time
+                    }
             return closest_flight
     except Exception as e:
-        print(f"OpenSky Error: {e}")
+        print(f"OpenSky error: {e}")
     return None
+
+# def lookup_flight_by_location(lat, lon):
+    # opensky_url = "https://opensky-network.org/api/states/all"
+    # try:
+    #     response = requests.get(opensky_url)
+    #     data = response.json()
+    #     min_distance = float("inf")
+    #     closest_flight = None
+    #     for state in data['states']:
+    #         flight_lon = state[5]
+    #         flight_lat = state[6]
+    #         if flight_lon is None or flight_lat is None:
+    #             continue
+    #         distance = ((lat - flight_lat) ** 2 + (lon - flight_lon) ** 2) ** 0.5
+    #         if distance < min_distance:
+    #             min_distance = distance
+    #             closest_flight = {
+    #                 "callsign": state[1].strip(),
+    #                 "origin_country": state[2],
+    #                 "longitude": flight_lon,
+    #                 "latitude": flight_lat,
+    #                 "velocity": state[9],
+    #                 "altitude": state[7]
+    #             }
+    #     if closest_flight:
+    #         return closest_flight
+    # except Exception as e:
+    #     print(f"OpenSky Error: {e}")
+    # return None
 
 def lookup_flight_by_metadata(datetime_original, lat, lon):
     if not (datetime_original and lat and lon):
