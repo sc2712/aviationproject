@@ -1,7 +1,8 @@
 import streamlit as st
 from model_logic import keras_load_model, preprocess_image, classify_image
-from inference_api import handle_inference_decision, extract_gps_from_image, lookup_flight_by_location
+from inference_api import handle_inference_decision, extract_gps_from_image, lookup_flight_by_location, extract_metadata
 from azure_storage import upload_to_blob, upload_corrected_image_to_blob
+from datetime import datetime
 from azure.storage.blob import BlobServiceClient
 import io
 
@@ -38,6 +39,15 @@ if uploaded_file is not None:
         img_tensor = preprocess_image(uploaded_file)
         class_name, confidence = classify_image(model, img_tensor)
         st.success(f"Prediction: {class_name} ({confidence * 100:.2f}% confidence)")
+
+    # Extract EXIF metadata
+    dt, coords = extract_metadata(uploaded_file)
+    st.write(f"Timestamp: {dt}" if dt else "No timestamp found.")
+    st.write(f"Location: {coords}" if coords else "No GPS data found.")
+
+    # (Optional) Convert timestamp to datetime
+    if dt:
+        dt_obj = datetime.strptime(dt, "%Y:%m:%d %H:%M:%S")
 
         alert_message = handle_inference_decision(class_name)
         if alert_message:
