@@ -17,7 +17,7 @@ st.write("Upload an image to identify aircraft and search for related flights.")
 
 uploaded_file = st.file_uploader("Upload an aircraft image", type=["jpg", "jpeg", "png"])
 
-col1, col2 = st.columns(2)
+
 
 MAX_IMAGE_SIZE_MB = 5  
 #check if the image size is below the limit
@@ -70,7 +70,8 @@ if uploaded_file is not None:
                 st.info("No correction needed. The prediction is correct.")
     else:
         st.info("Please upload an image to start.")
-
+        
+        col1, col2 = st.columns(2)
 
         #GPS section
         st.subheader("Flight Lookup Based on Location")
@@ -134,23 +135,23 @@ if uploaded_file is not None:
                     st.write(f"Location: ({closest_flight['latitude']:.4f}, {closest_flight['longitude']:.4f})")
                 else:
                     st.error("No flights found nearby.")
+                    
+                with col2:        
+                    st.warning("If no Datetime metadata is found, please enter manually:")
+                    time_input = st.time_input("Select the time the image was taken (UTC)")
+                    date_input = st.date_input("Select the date the image was taken")
 
-with col2:        
-    st.warning("If no Datetime metadata is found, please enter manually:")
-    time_input = st.time_input("Select the time the image was taken (UTC)")
-    date_input = st.date_input("Select the date the image was taken")
-
-    if st.button("Find Nearby Flights"):
-        if date_input and date_input and lat and lon:
-            manual_dt_str = f"{date_input.strftime('%Y:%m:%d')} {time_input.strftime('%H:%M:%S')}"
-            closest_flight = lookup_flight_by_metadata(manual_dt_str, lat, lon)
-            if closest_flight:
-                st.success(f"Closest flight on {closest_flight['timestamp']}:")
-                st.write(f"{closest_flight['airline']} flight {closest_flight['flight_number']}")
-                st.write(f"From {closest_flight['departure_airport']} to {closest_flight['arrival_airport']}")
-                st.write(f"Status: {closest_flight['status']}")
-            else:
-                st.error("No flight match found for the given date/time and location.")
-        else:
-            st.error("Please enter full date, time, and valid coordinates.") 
+                    if st.button("Find Nearby Flights"):
+                        if date_input and date_input and lat and lon:
+                            manual_dt_str = f"{date_input.strftime('%Y:%m:%d')} {time_input.strftime('%H:%M:%S')}"
+                            closest_flight = lookup_flight_by_metadata(manual_dt_str, lat, lon)
+                            if closest_flight:
+                                st.success(f"Closest flight on {closest_flight['timestamp']}:")
+                                st.write(f"{closest_flight['airline']} flight {closest_flight['flight_number']}")
+                                st.write(f"From {closest_flight['departure_airport']} to {closest_flight['arrival_airport']}")
+                                st.write(f"Status: {closest_flight['status']}")
+                            else:
+                                st.error("No flight match found for the given date/time and location.")
+                        else:
+                            st.error("Please enter full date, time, and valid coordinates.") 
     
