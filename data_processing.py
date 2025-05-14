@@ -4,7 +4,7 @@ import os
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-dataset_path = "dataset" #"fake commercial aircraft (AI)"
+dataset_path = "dataset"
 
 print("Folder Exists:", os.path.exists(dataset_path))
 print("Files:", os.listdir(dataset_path) if os.path.exists(dataset_path) else "Path incorrect")

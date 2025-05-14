@@ -65,13 +65,11 @@ model = Sequential([
     Dense(train_data.num_classes, activation='softmax')
 ])
 
-#compile the model
-model.compile(optimizer=Adam(learning_rate=0.001),
+model.compile(optimizer=Adam(learning_rate=0.001), #model compilation
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
-#train the model
-epochs = 10
+epochs = 10 #model training
 history = model.fit(train_data, validation_data=val_data, epochs=epochs)
 
 #evaluate model on test data
